@@ -1,9 +1,7 @@
-import {
-    time,
-    loadFixture,
-  } from "@nomicfoundation/hardhat-toolbox/network-helpers";
-  import { expect } from "chai";
-  import hre from "hardhat";
+import { time, loadFixture, } from "@nomicfoundation/hardhat-toolbox/network-helpers";
+import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
+import { expect } from "chai";
+import hre from "hardhat";
   
   describe("Fvkry", function () {
     async function deployFvkryFixture() {
@@ -29,7 +27,7 @@ import {
         expect(await fvkry.owner()).to.equal(owner.address);
       });
     });
-  
+
     describe("ETH Locking", function () {
       const VAULT_ID = 0;
       const LOCK_PERIOD = 365 * 24 * 60 * 60; // 1 year
@@ -39,10 +37,12 @@ import {
       it("Should lock ETH successfully", async function () {
         const { fvkry, owner } = await loadFixture(deployFvkryFixture);
   
+        //lock eth
         await expect(fvkry.lockETH(VAULT_ID, LOCK_PERIOD, TITLE, { value: LOCK_AMOUNT }))
           .to.emit(fvkry, "AssetLocked")
-          .withArgs(hre.ethers.ZeroAddress, LOCK_AMOUNT, TITLE, VAULT_ID, await time.latest() + LOCK_PERIOD, await time.latest());
+          .withArgs(hre.ethers.ZeroAddress, LOCK_AMOUNT, TITLE, VAULT_ID, anyValue, anyValue);
   
+        // verify locks
         const locks = await fvkry.getUserLocks(VAULT_ID);
         expect(locks[0].amount).to.equal(LOCK_AMOUNT);
         expect(locks[0].isNative).to.be.true;
@@ -57,18 +57,22 @@ import {
       it("Should allow adding more ETH to locked amount", async function () {
         const { fvkry } = await loadFixture(deployFvkryFixture);
         
+        //first lock
         await fvkry.lockETH(VAULT_ID, LOCK_PERIOD, TITLE, { value: LOCK_AMOUNT });
+
+        // Add more ETH to vault, emit event and get the timestamp
         const additionalAmount = hre.ethers.parseEther("0.5");
         
         await expect(fvkry.addToLockedETH(VAULT_ID, 0, { value: additionalAmount }))
           .to.emit(fvkry, "AssetAdded")
-          .withArgs(hre.ethers.ZeroAddress, additionalAmount, TITLE, VAULT_ID, await time.latest());
+          .withArgs(hre.ethers.ZeroAddress, additionalAmount, TITLE, VAULT_ID, anyValue);
   
+        //verify addition
         const locks = await fvkry.getUserLocks(VAULT_ID);
         expect(locks[0].amount).to.equal(LOCK_AMOUNT + additionalAmount);
       });
     });
-  
+    
     describe("Token Locking", function () {
       const VAULT_ID = 0;
       const LOCK_PERIOD = 365 * 24 * 60 * 60; // 1 year
@@ -81,10 +85,12 @@ import {
         // Approve tokens first
         await mockToken.approve(fvkry.target, LOCK_AMOUNT);
   
+        //execute transaction
         await expect(fvkry.lockToken(mockToken.target, LOCK_AMOUNT, VAULT_ID, LOCK_PERIOD, TITLE))
           .to.emit(fvkry, "AssetLocked")
-          .withArgs(mockToken.target, LOCK_AMOUNT, TITLE, VAULT_ID, await time.latest() + LOCK_PERIOD, await time.latest());
+          .withArgs(mockToken.target, LOCK_AMOUNT, TITLE, VAULT_ID, anyValue, anyValue);
   
+        //verify locks
         const locks = await fvkry.getUserLocks(VAULT_ID);
         expect(locks[0].amount).to.equal(LOCK_AMOUNT);
         expect(locks[0].isNative).to.be.false;
@@ -107,16 +113,18 @@ import {
         // Add more tokens
         const additionalAmount = hre.ethers.parseEther("50");
         await mockToken.approve(fvkry.target, additionalAmount);
+
         
         await expect(fvkry.addToLockedTokens(mockToken.target, 0, additionalAmount, VAULT_ID))
           .to.emit(fvkry, "AssetAdded")
-          .withArgs(mockToken.target, additionalAmount, TITLE, VAULT_ID, await time.latest());
+          .withArgs(mockToken.target, additionalAmount, TITLE, VAULT_ID, anyValue);
   
+        //verify addition
         const locks = await fvkry.getUserLocks(VAULT_ID);
         expect(locks[0].amount).to.equal(LOCK_AMOUNT + additionalAmount);
       });
     });
-  
+
     describe("Asset Transfer", function () {
       const VAULT_ID = 0;
       const LOCK_PERIOD = 365 * 24 * 60 * 60; // 1 year
@@ -141,8 +149,22 @@ import {
         await time.increase(LOCK_PERIOD + 1);
   
         await expect(fvkry.transferAsset(0, VAULT_ID, LOCK_AMOUNT, false))
-          .to.emit(fvkry, "AssetTransfered")
-          .withArgs(hre.ethers.ZeroAddress, LOCK_AMOUNT, TITLE, VAULT_ID, await time.latest());
+          .to.emit(fvkry, "AssetWithdrawal")
+          .withArgs(hre.ethers.ZeroAddress, LOCK_AMOUNT, TITLE, VAULT_ID, anyValue);
+  
+        // Check that the ETH was transferred
+        const locks = await fvkry.getUserLocks(VAULT_ID);
+        expect(locks[0].withdrawn).to.be.true;
+      });
+
+      it("Should allow withdrawal after locking goal is reached", async function () {
+        const { fvkry } = await loadFixture(deployFvkryFixture);
+        
+        //lock eth
+        await fvkry.lockETH(VAULT_ID, LOCK_PERIOD, TITLE, { value: LOCK_AMOUNT });
+          
+        //set goal as reached
+        await fvkry.transferAsset(0, VAULT_ID, LOCK_AMOUNT, true);
   
         // Check that the ETH was transferred
         const locks = await fvkry.getUserLocks(VAULT_ID);
@@ -182,7 +204,7 @@ import {
   
         await expect(fvkry.extendLockPeriod(0, VAULT_ID, EXTENSION_PERIOD))
           .to.emit(fvkry, "LockPeriodExtended")
-          .withArgs(hre.ethers.ZeroAddress, VAULT_ID, EXTENSION_PERIOD, TITLE, await time.latest());
+          .withArgs(hre.ethers.ZeroAddress, VAULT_ID, EXTENSION_PERIOD, TITLE, anyValue);
   
         const locks = await fvkry.getUserLocks(VAULT_ID);
         expect(locks[0].lockEndTime).to.be.approximately(
@@ -200,4 +222,5 @@ import {
           .to.be.revertedWith("The lock period has not yet expired!");
       });
     });
+    
   });

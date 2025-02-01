@@ -34,7 +34,7 @@ contract Fvkry is Ownable, ReentrancyGuard {
 
     //Events
     event AssetLocked(address indexed token, uint256 amount, string title, uint8 vault,uint256 lockEndTime, uint256 timestamp);
-    event AssetTransfered(address indexed  token, uint256 amount, string title, uint8 vault, uint256 timestamp);
+    event AssetWithdrawal(address indexed  token, uint256 amount, string title, uint8 vault, uint256 timestamp);
     event AssetAdded(address indexed token, uint256 amount, string title, uint8 vault, uint256 timestamp);
     event LockPeriodExtended(address indexed  token, uint8 vault, uint256 lockperiod, string title, uint256 timestamp);
 
@@ -155,7 +155,7 @@ contract Fvkry is Ownable, ReentrancyGuard {
             recordTransac(address(lock.token), _vault, _amount, lock.title, true);
         }
 
-        emit AssetTransfered(address(lock.token), _amount , lock.title, _vault, block.timestamp);
+        emit AssetWithdrawal(address(lock.token), _amount , lock.title, _vault, block.timestamp);
     }
 
     //record transaction
