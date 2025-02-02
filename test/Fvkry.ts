@@ -29,7 +29,7 @@ import hre from "hardhat";
     });
 
     describe("ETH Locking", function () {
-      const VAULT_ID = 0;
+      const VAULT_ID = 1;
       const LOCK_PERIOD = 365 * 24 * 60 * 60; // 1 year
       const LOCK_AMOUNT = hre.ethers.parseEther("1");
       const TITLE = "My ETH Lock";
@@ -51,7 +51,7 @@ import hre from "hardhat";
       it("Should fail to lock 0 ETH", async function () {
         const { fvkry } = await loadFixture(deployFvkryFixture);
         await expect(fvkry.lockETH(VAULT_ID, LOCK_PERIOD, TITLE, { value: 0 }))
-          .to.be.revertedWith("ETH to lock must a value greater than 0");
+          .to.be.revertedWithCustomError(fvkry, "AmountBeGreaterThan0");
       });
   
       it("Should allow adding more ETH to locked amount", async function () {
@@ -74,7 +74,7 @@ import hre from "hardhat";
     });
     
     describe("Token Locking", function () {
-      const VAULT_ID = 0;
+      const VAULT_ID = 1;
       const LOCK_PERIOD = 365 * 24 * 60 * 60; // 1 year
       const LOCK_AMOUNT = hre.ethers.parseEther("100");
       const TITLE = "My Token Lock";
@@ -126,7 +126,7 @@ import hre from "hardhat";
     });
 
     describe("Asset Transfer", function () {
-      const VAULT_ID = 0;
+      const VAULT_ID = 1;
       const LOCK_PERIOD = 365 * 24 * 60 * 60; // 1 year
       const LOCK_AMOUNT = hre.ethers.parseEther("1");
       const TITLE = "Test Lock";
@@ -136,8 +136,8 @@ import hre from "hardhat";
         
         await fvkry.lockETH(VAULT_ID, LOCK_PERIOD, TITLE, { value: LOCK_AMOUNT });
         
-        await expect(fvkry.transferAsset(0, VAULT_ID, LOCK_AMOUNT, false))
-          .to.be.revertedWith("The lock period has not yet expired and the value has not reached set goal!");
+        await expect(fvkry.withdrawAsset(0, VAULT_ID, LOCK_AMOUNT, false))
+          .to.be.revertedWithCustomError(fvkry, "LockPeriodNotExpiredAndGoalNotReached");
       });
   
       it("Should allow withdrawal after lock period ends", async function () {
@@ -148,8 +148,8 @@ import hre from "hardhat";
         // Increase time to after lock period
         await time.increase(LOCK_PERIOD + 1);
   
-        await expect(fvkry.transferAsset(0, VAULT_ID, LOCK_AMOUNT, false))
-          .to.emit(fvkry, "AssetWithdrawal")
+        await expect(fvkry.withdrawAsset(0, VAULT_ID, LOCK_AMOUNT, false))
+          .to.emit(fvkry, "AssetWithdrawn")
           .withArgs(hre.ethers.ZeroAddress, LOCK_AMOUNT, TITLE, VAULT_ID, anyValue);
   
         // Check that the ETH was transferred
@@ -164,7 +164,7 @@ import hre from "hardhat";
         await fvkry.lockETH(VAULT_ID, LOCK_PERIOD, TITLE, { value: LOCK_AMOUNT });
           
         //set goal as reached
-        await fvkry.transferAsset(0, VAULT_ID, LOCK_AMOUNT, true);
+        await fvkry.withdrawAsset(0, VAULT_ID, LOCK_AMOUNT, true);
   
         // Check that the ETH was transferred
         const locks = await fvkry.getUserLocks(VAULT_ID);
@@ -179,7 +179,7 @@ import hre from "hardhat";
         await time.increase(LOCK_PERIOD + 1);
   
         const partialAmount = LOCK_AMOUNT / 2n;
-        await fvkry.transferAsset(0, VAULT_ID, partialAmount, false);
+        await fvkry.withdrawAsset(0, VAULT_ID, partialAmount, false);
   
         const locks = await fvkry.getUserLocks(VAULT_ID);
         expect(locks[0].amount).to.equal(partialAmount);
@@ -188,7 +188,7 @@ import hre from "hardhat";
     });
   
     describe("Lock Period Extension", function () {
-      const VAULT_ID = 0;
+      const VAULT_ID = 1;
       const INITIAL_LOCK_PERIOD = 30 * 24 * 60 * 60; // 30 days
       const EXTENSION_PERIOD = 60 * 24 * 60 * 60; // 60 days
       const LOCK_AMOUNT = hre.ethers.parseEther("1");
@@ -219,7 +219,7 @@ import hre from "hardhat";
         await fvkry.lockETH(VAULT_ID, INITIAL_LOCK_PERIOD, TITLE, { value: LOCK_AMOUNT });
         
         await expect(fvkry.extendLockPeriod(0, VAULT_ID, EXTENSION_PERIOD))
-          .to.be.revertedWith("The lock period has not yet expired!");
+          .to.be.revertedWithCustomError(fvkry, "LockPeriodNotExpired");
       });
     });
     
