@@ -128,7 +128,7 @@ contract Fvkry is Ownable, ReentrancyGuard {
         uint32 _assetID) 
     external payable  nonReentrant contractNotPaused validVault(_vault) {
         if(msg.value <= 0) revert AmountBeGreaterThan0();
-        if(_assetID > userLockedAssets[msg.sender][_vault].length) revert InvalidAssetID();
+        if(_assetID >= userLockedAssets[msg.sender][_vault].length) revert InvalidAssetID();
 
         Lock storage lock = userLockedAssets[msg.sender][_vault][_assetID];
 
@@ -189,7 +189,7 @@ contract Fvkry is Ownable, ReentrancyGuard {
         if(address(_token) == address(0)) revert InvalidTokenAddress(address(_token));
         if(blackListedToken[address(_token)]) revert TokenIsBlackListed(address(_token));
         if(_amount <= 0) revert AmountBeGreaterThan0();
-        if(_assetID > userLockedAssets[msg.sender][_vault].length) revert InvalidAssetID();
+        if(_assetID >= userLockedAssets[msg.sender][_vault].length) revert InvalidAssetID();
 
         Lock storage lock = userLockedAssets[msg.sender][_vault][_assetID];
         
@@ -219,7 +219,7 @@ contract Fvkry is Ownable, ReentrancyGuard {
         uint256 _amount, 
         bool _goalReachedByValue
     ) external  nonReentrant validVault(_vault) {
-        if(_assetID > userLockedAssets[msg.sender][_vault].length) revert InvalidAssetID();
+        if(_assetID >= userLockedAssets[msg.sender][_vault].length) revert InvalidAssetID();
         
         Lock storage lock = userLockedAssets[msg.sender][_vault][_assetID];
 
@@ -285,15 +285,22 @@ contract Fvkry is Ownable, ReentrancyGuard {
         return userLockedAssets[msg.sender][_vault];
     }
 
+    //Get user transactions
+    function getUserTransactions(uint8 _vault) public view returns (TransacHist[] memory) {
+        if(_vault < 0 || _vault > 4) revert InvalidVaultNumber();
+        return userTransactions[msg.sender][_vault];
+    }
+
     //extend lock period after expiry
     function extendLockPeriod(
         uint32 _assetID, 
         uint8 _vault, 
         uint32 _lockperiod
     ) external validLockPeriod(_lockperiod) {
+        if(_assetID >= userLockedAssets[msg.sender][_vault].length) revert InvalidAssetID();
+
         Lock storage lock = userLockedAssets[msg.sender][_vault][_assetID];
 
-        if(_assetID > userLockedAssets[msg.sender][_vault].length) revert InvalidAssetID();
         if(lock.lockEndTime > block.timestamp) revert LockPeriodNotExpired();
         
         userLockedAssets[msg.sender][_vault][_assetID].lockEndTime = uint32(block.timestamp + _lockperiod);
@@ -331,7 +338,7 @@ contract Fvkry is Ownable, ReentrancyGuard {
         uint8 _vault, 
         uint8 _assetID
     ) external validVault(_vault)  {
-        if(_assetID > userLockedAssets[msg.sender][_vault].length) revert InvalidAssetID();
+        if(_assetID >= userLockedAssets[msg.sender][_vault].length) revert InvalidAssetID();
 
         Lock storage lock = userLockedAssets[msg.sender][_vault][_assetID];
         if(lock.lockEndTime > block.timestamp) revert LockPeriodNotExpired();
@@ -357,7 +364,7 @@ contract Fvkry is Ownable, ReentrancyGuard {
         uint8 _assetID, 
         string memory _newTitle
     ) external validVault(_vault) {
-        if(_assetID > userLockedAssets[msg.sender][_vault].length) revert InvalidAssetID();
+        if(_assetID >= userLockedAssets[msg.sender][_vault].length) revert InvalidAssetID();
 
         //rename
         userLockedAssets[msg.sender][_vault][_assetID].title = _newTitle;
@@ -374,7 +381,7 @@ contract Fvkry is Ownable, ReentrancyGuard {
         uint8 _toAssetID
     ) external nonReentrant validVault(_fromVault) validVault(_toVault) {
         if(
-            _fromAssetID > userLockedAssets[msg.sender][_fromVault].length && 
+            _fromAssetID > userLockedAssets[msg.sender][_fromVault].length || 
             _toAssetID > userLockedAssets[msg.sender][_toVault].length
         ) revert InvalidAssetID();
 
