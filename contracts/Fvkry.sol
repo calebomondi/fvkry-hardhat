@@ -350,7 +350,7 @@ contract Fvkry is Ownable, ReentrancyGuard {
         //swap if asset ID not last index
         if(_assetID != lastIndex) {
             userLockedAssets[msg.sender][_vault][_assetID] = userLockedAssets[msg.sender][_vault][lastIndex];
-        }
+        } else {}
 
         //remove last element
         userLockedAssets[msg.sender][_vault].pop();
@@ -381,8 +381,8 @@ contract Fvkry is Ownable, ReentrancyGuard {
         uint8 _toAssetID
     ) external nonReentrant validVault(_fromVault) validVault(_toVault) {
         if(
-            _fromAssetID > userLockedAssets[msg.sender][_fromVault].length || 
-            _toAssetID > userLockedAssets[msg.sender][_toVault].length
+            _fromAssetID >= userLockedAssets[msg.sender][_fromVault].length || 
+            _toAssetID >= userLockedAssets[msg.sender][_toVault].length
         ) revert InvalidAssetID();
 
         Lock storage fLock = userLockedAssets[msg.sender][_fromVault][_fromAssetID];

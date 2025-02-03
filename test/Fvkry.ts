@@ -27,7 +27,7 @@ import hre from "hardhat";
         expect(await fvkry.owner()).to.equal(owner.address);
       });
     });
-  /*  
+   
     describe("ETH Locking", function () {
       const VAULT_ID = 1;
       const LOCK_PERIOD = 365 * 24 * 60 * 60; // 1 year
@@ -615,8 +615,8 @@ import hre from "hardhat";
     });
     
     describe("Transfer Assets", function() {
-      const LOCK_PERIOD1 = 365 * 24 * 60 * 60; // 1 year
-      const LOCK_PERIOD2 = 10 * 24 * 60 * 60; 
+      const LOCK_PERIOD1 = 365 * 24 * 60 * 60;
+      const LOCK_PERIOD2 = 10 * 24 * 60 * 60;
       const LOCK_AMOUNT = hre.ethers.parseEther("100");
 
       it("Should allow asset transfer between sub-vaults of same address", async function () {
@@ -725,11 +725,11 @@ import hre from "hardhat";
         // transfer
         await time.increase(LOCK_PERIOD2 + 1);
 
-        await expect(fvkry.transferAsset(LOCK_AMOUNT, 2, 0, 1, 1))
+        await expect(fvkry.transferAsset(LOCK_AMOUNT, 2, 1, 1, 1))
           .to.be.revertedWithCustomError(fvkry, "InvalidAssetID");
       })
     });
-    
+
     describe("Get Contract Balances", function () {
       const VAULT_ID = 1;
       const LOCK_PERIOD = 365 * 24 * 60 * 60; // 1 year
@@ -755,14 +755,14 @@ import hre from "hardhat";
         expect(await fvkry.getContractTokenBalance(mockToken.target)).to.equal(LOCK_AMOUNT);
       });
     });
-    */
+    
     describe("Record Transaction", function () {
       const VAULT_ID = 1;
       const LOCK_PERIOD = 365 * 24 * 60 * 60; // 1 year
       const LOCK_AMOUNT = hre.ethers.parseEther("1");
       const TITLE = "My ETH Lock";
 
-      it("Should record transaction of lock successful tokens", async function () {
+      it("Should record transaction of successful tokens lock", async function () {
         const { fvkry, mockToken } = await loadFixture(deployFvkryFixture);
   
         // Approve tokens first
@@ -777,6 +777,42 @@ import hre from "hardhat";
         expect(records[0].title).to.be.equal(TITLE);
         expect(records[0].token).to.be.equal(mockToken.target);
       });
+
+      it("Should record transaction of successful token addition", async function () {
+        const { fvkry, mockToken } = await loadFixture(deployFvkryFixture);
+  
+        // Lock tokens
+        await mockToken.approve(fvkry.target, LOCK_AMOUNT);
+        await fvkry.lockToken(mockToken.target, LOCK_AMOUNT, VAULT_ID, LOCK_PERIOD, TITLE);
+
+        // Add more tokens
+        const additionalAmount = hre.ethers.parseEther("1");
+        await mockToken.approve(fvkry.target, additionalAmount);
+        await fvkry.addToLockedTokens(mockToken.target, 0, additionalAmount, VAULT_ID);     
+
+        //verify record
+        const records = await fvkry.getUserTransactions(VAULT_ID);
+
+        expect(records[1].amount).to.be.equal(additionalAmount);
+        expect(records[1].token).to.be.equal(mockToken.target);
+      });
+
+      it("Should record transaction of a successful withdrawal of an asset", async function() {
+        const { fvkry, mockToken } = await loadFixture(deployFvkryFixture);
+  
+        // Lock tokens
+        await mockToken.approve(fvkry.target, LOCK_AMOUNT);
+        await fvkry.lockToken(mockToken.target, LOCK_AMOUNT, VAULT_ID, LOCK_PERIOD, TITLE);
+
+        //withdraw
+        await time.increase(LOCK_PERIOD + 1);
+        await fvkry.withdrawAsset(0,VAULT_ID,LOCK_AMOUNT,false);
+
+        const record = await fvkry.getUserTransactions(VAULT_ID);
+
+        expect(record[1].amount).to.be.equal(LOCK_AMOUNT);
+        expect(record[1].token).to.be.equal(mockToken.target);
+      })
     })
     
   });

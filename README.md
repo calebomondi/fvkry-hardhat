@@ -27,6 +27,7 @@ Ensure you have the following installed:
 - Node.js
 - Hardhat
 - Metamask (for interacting with the contract)
+- Infura or Alchemy RPC URL and API endpoints
 
 ### Steps
 1. Clone the repository:
@@ -121,6 +122,24 @@ The contract includes comprehensive test coverage:
 To run test
 ```sh
 npx hardhat test
+```
+
+To run test coverage
+```sh
+npx hardhat coverage
+```
+
+```bash
+---------------------|----------|----------|----------|----------|----------------|
+File                 |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
+---------------------|----------|----------|----------|----------|----------------|
+ contracts\          |      100 |    76.32 |      100 |    99.07 |                |
+  Fvkry.sol          |      100 |    76.32 |      100 |    99.07 |            352 |
+ contracts\test\     |      100 |      100 |      100 |      100 |                |
+  MockERC20Token.sol |      100 |      100 |      100 |      100 |                |
+---------------------|----------|----------|----------|----------|----------------|
+All files            |      100 |    76.32 |      100 |    99.07 |                |
+---------------------|----------|----------|----------|----------|----------------|
 ```
 
 ## Security Considerations
