@@ -289,7 +289,7 @@ contract Fvkry is Ownable, ReentrancyGuard {
         uint32 _assetID, 
         uint8 _vault, 
         uint32 _lockperiod
-    ) external {
+    ) external validLockPeriod(_lockperiod) {
         Lock storage lock = userLockedAssets[msg.sender][_vault][_assetID];
 
         if(_assetID > userLockedAssets[msg.sender][_vault].length) revert InvalidAssetID();
@@ -326,7 +326,10 @@ contract Fvkry is Ownable, ReentrancyGuard {
     }
 
     //delete vault
-    function deleteVault(uint8 _vault, uint8 _assetID) external  {
+    function deleteVault(
+        uint8 _vault, 
+        uint8 _assetID
+    ) external validVault(_vault)  {
         if(_assetID > userLockedAssets[msg.sender][_vault].length) revert InvalidAssetID();
 
         Lock storage lock = userLockedAssets[msg.sender][_vault][_assetID];
@@ -348,7 +351,11 @@ contract Fvkry is Ownable, ReentrancyGuard {
     }
 
     //rename vault
-    function renameVault(uint8 _vault, uint8 _assetID, string memory _newTitle) external {
+    function renameVault(
+        uint8 _vault, 
+        uint8 _assetID, 
+        string memory _newTitle
+    ) external validVault(_vault) {
         if(_assetID > userLockedAssets[msg.sender][_vault].length) revert InvalidAssetID();
 
         //rename
@@ -358,7 +365,13 @@ contract Fvkry is Ownable, ReentrancyGuard {
     }
 
     //transfer assets between vaults and sub-vaults
-    function transferAsset(uint256 _amount, uint8 _fromVault, uint8 _fromAssetID, uint8 _toVault, uint8 _toAssetID) external nonReentrant {
+    function transferAsset(
+        uint256 _amount, 
+        uint8 _fromVault, 
+        uint8 _fromAssetID, 
+        uint8 _toVault, 
+        uint8 _toAssetID
+    ) external nonReentrant validVault(_fromVault) validVault(_toVault) {
         if(
             _fromAssetID > userLockedAssets[msg.sender][_fromVault].length && 
             _toAssetID > userLockedAssets[msg.sender][_toVault].length
