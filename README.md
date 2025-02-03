@@ -94,6 +94,21 @@ withdrawAsset(uint32 _assetID, uint8 _vault, uint256 _amount, bool _goalReachedB
 extendLockPeriod(uint32 _assetID, uint8 _vault, uint32 _lockperiod)
 ```
 
+### Renaming Sub-Vault
+```solidity
+renameSubVault(uint8 _vault, uint8 _assetID, string memory _newTitle)
+```
+
+### Transfering assets
+```solidity
+transferAsset( uint256 _amount, uint8 _fromVault, uint8 _fromAssetID, uint8 _toVault, uint8 _toAssetID)
+```
+
+### Delete Sub-Vault
+```solidity
+deleteSubVault( uint8 _vault, uint8 _assetID)
+```
+
 ### Admin Functions
 - **Pause Contract**: `pauseContract()`
 - **Unpause Contract**: `unPauseContract()`
