@@ -1,13 +1,139 @@
-# Sample Hardhat Project
+# FVKRY PRVNTA Smart Contract
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a Hardhat Ignition module that deploys that contract.
+## Overview
+FVKRY PRVNTA is a financial discipline tool designed to help virtual asset owners manage impulsive spending and trading by locking assets (ETH and ERC-20 tokens) for set durations. Users can create multiple sub-vaults within the defined main vaults to manage their locked assets securely. By implementing strategic asset locking mechanisms, the protocol provides structure in volatile markets, countering cognitive biases and promoting long-term financial stability.
 
-Try running some of the following tasks:
+## Features
+- Lock ETH and ERC-20 tokens for a specified duration.
+- Extend lock periods after expiration (up to 5 years).
+- Add more assets to an existing locked vault.
+- Withdraw assets upon lock period expiration.
+- Partial and full withdrawal options
+- Transfer assets between vaults and sub-vaults.
+- Blacklist certain tokens (admin-only feature).
+- Pause and unpause the contract (admin-only feature).
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat ignition deploy ./ignition/modules/Lock.ts
+## Smart Contract Details
+- **Solidity Version**: ^0.8.28
+- **Frameworks & Libraries**: OpenZeppelin Contracts (IERC20, SafeERC20, ReentrancyGuard, Ownable)
+- **Security Features**:
+  - Prevents reentrancy attacks.
+  - Uses SafeERC20 for secure token transactions.
+  - Implements access control for admin-only functions such as contract pausing.
+
+## Deployment
+### Prerequisites
+Ensure you have the following installed:
+- Node.js
+- Hardhat
+- Metamask (for interacting with the contract)
+
+### Steps
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/your-repo/fvkry-prvnta.git
+   cd fvkry-prvnta
+   ```
+2. Install dependencies:
+   ```sh
+   npm install
+   ```
+3. Compile the contract:
+   ```sh
+   npx hardhat compile
+   ```
+4. Deploy the contract:
+   ```sh
+   npx hardhat run scripts/deploy.js --network <network>
+   ```
+
+## Main Functions
+1. `lockETH()`: Lock native ETH with custom duration
+2. `lockToken()`: Lock ERC20 tokens
+3. `addToLockedETH()`: Add more ETH to existing lock
+4. `addToLockedTokens()`: Add more tokens to existing lock
+5. `withdrawAsset()`: Withdraw locked assets
+6. `extendLockPeriod()`: Extend lock duration post-expiry
+7. `transferAsset()`: Transfer assets between vaults
+
+## Usage
+### Locking ETH
+```solidity
+lockETH(uint8 _vault, uint32 _lockperiod, string memory _title)
 ```
+- `_vault`: Vault ID (1-4)
+- `_lockperiod`: Lock duration (max 1096 days)
+- `_title`: Description of the lock
+
+### Locking ERC-20 Tokens
+```solidity
+lockToken(IERC20 _token, uint256 _amount, uint8 _vault, uint256 _lockperiod, string memory _title)
+```
+- `_token`: Address of ERC-20 token
+- `_amount`: Amount to lock
+- `_vault`: Vault ID (1-4)
+- `_lockperiod`: Lock duration
+- `_title`: Description of the lock
+
+### Adding More Assets to Locked Vaults
+```solidity
+addToLockedETH(uint8 _vault, uint32 _assetID)
+```
+```solidity
+addToLockedTokens(IERC20 _token, uint32 _assetID, uint256 _amount, uint8 _vault)
+```
+
+### Withdrawing Assets
+```solidity
+withdrawAsset(uint32 _assetID, uint8 _vault, uint256 _amount, bool _goalReachedByValue)
+```
+
+### Extending Lock Period
+```solidity
+extendLockPeriod(uint32 _assetID, uint8 _vault, uint32 _lockperiod)
+```
+
+### Admin Functions
+- **Pause Contract**: `pauseContract()`
+- **Unpause Contract**: `unPauseContract()`
+- **Blacklist Token**: `blackListToken(IERC20 _token)`
+- **Unblacklist Token**: `unBlackListToken(IERC20 _token)`
+
+## Events
+- `AssetLocked` – Emitted when assets are locked.
+- `AssetWithdrawn` – Emitted when assets are withdrawn.
+- `LockPeriodExtended` – Emitted when a lock period is extended.
+- `ContractPaused` – Emitted when the contract is paused.
+- `BlackListed` – Emitted when a token is blacklisted.
+- `VaultDeleted` – Emitted when a vault is deleted.
+
+## Testing 
+The contract includes comprehensive test coverage:
+
+- Deployment tests
+- ETH & Token locking mechanisms
+- Withdrawal scenarios
+- Lock period extensions
+- Asset transfers
+- Contract pausing
+- Token blacklisting
+
+To run test
+```sh
+npx hardhat test
+```
+
+## Security Considerations
+- Users should verify the lock period before locking assets.
+- Blacklisted tokens cannot be locked or added to a vault.
+- The contract owner has admin privileges but cannot access users’ funds.
+
+## License
+This project is licensed under the MIT License.
+
+## Contributing
+1. Fork the repository
+2. Create your feature branch
+3. Commit changes
+4. Push to branch
+5. Create pull request
