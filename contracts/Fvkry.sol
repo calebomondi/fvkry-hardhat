@@ -32,9 +32,9 @@ contract Fvkry is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     
     //constants
-    uint256 immutable public  MAX_LOCKDURATION = 1096 * 24 * 60 * 60;
+    uint256 immutable public  MAX_LOCKDURATION = 1825 * 24 * 60 * 60;
     uint8 immutable public  MAX_VAULTS = 5;
-    uint8 immutable public  MAX_SUB_VAULTS = 1;
+    uint8 immutable public  MAX_SUB_VAULTS = 100;
 
     //structs
     struct Lock {
