@@ -195,7 +195,6 @@ contract Fvkry is Ownable, ReentrancyGuard {
         
         if(lock.lockEndTime < block.timestamp) revert LockPeriodExpired();
 
-
         //check balance
         uint256 _tokenBalance = _token.balanceOf(msg.sender);
         if(_amount > _tokenBalance) revert InadequateTokenBalance(address(_token));
