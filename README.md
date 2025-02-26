@@ -157,6 +157,14 @@ All files            |      100 |    76.32 |      100 |    99.07 |              
 ---------------------|----------|----------|----------|----------|----------------|
 ```
 
+### Custom Test Tokens
+- For testing the ERC20 token locking mechanism of the platform, we created five mock tokens
+[MAN](https://sepolia-blockscout.lisk.com/address/0x37D32Edc11F8Ed47fB4f4A9FBBA707D6047B7CDf#code)
+[AFRIK](https://sepolia-blockscout.lisk.com/address/0x07c168461806066991599E5293FaAcA4131Dc77C#code)
+[MEG](https://sepolia-blockscout.lisk.com/address/0x6194362cC21d498aAFEBD3A9F90838956358a816#code)
+[LRT](https://sepolia-blockscout.lisk.com/address/0x731076647a0CCE3Ee55e2B60CA3d779658De4D2b#code)
+[KIND](https://sepolia-blockscout.lisk.com/address/0xA741dB5baeaD1de83F83e63Faff98c140dE570c7#code)
+
 ## Security Considerations
 - Users should verify the lock period before locking assets.
 - Blacklisted tokens cannot be locked or added to a vault.
@@ -174,4 +182,4 @@ This project is licensed under the MIT License.
 
 ## Verified and Published in Sepolia Blockscout
 Successfully verified FVKRY PRVNTA contract on the block explorer.
-[View On Sepolia Blockscout](https://sepolia-blockscout.lisk.com/address/0x7E5CF6a6ee7f8e9FDB5a17eEAc9F8A87019b15f3#code)
+[View On Sepolia Blockscout](https://sepolia-blockscout.lisk.com/address/0x16e05EA02BBB69D50c858DCeCC707CA81657D8fa#code)
