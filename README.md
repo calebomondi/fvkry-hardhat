@@ -32,7 +32,7 @@ Ensure you have the following installed:
 ### Steps
 1. Clone the repository:
    ```sh
-   git clone https://github.com/your-repo/fvkry-prvnta.git
+   git clone https://github.com/calebomondi/fvkry-hardhat.git
    cd fvkry-prvnta
    ```
 2. Install dependencies:
