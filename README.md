@@ -182,6 +182,7 @@ This project is licensed under the MIT License.
 4. Push to branch
 5. Create pull request
 
-## Verified and Published in Sepolia Blockscout
+## Verified and Published in Sepolia Blockscout and Sepolia Etherscan
 Successfully verified FVKRY PRVNTA contract on the block explorer.
 [View On Sepolia Blockscout](https://sepolia-blockscout.lisk.com/address/0x16e05EA02BBB69D50c858DCeCC707CA81657D8fa#code)
+[View On Sepolia Etherscan](https://sepolia.etherscan.io/address/0x760d07bB72599C692097EC81EB2D16b9Bb76431E#code)
