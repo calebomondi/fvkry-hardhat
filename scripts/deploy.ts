@@ -1,11 +1,11 @@
 import { ethers } from 'hardhat';
 
 async function main() {
-  const fvkry = await ethers.deployContract('Fvkry');
+  const mockToken = await ethers.deployContract('MockERC20Token');
 
-  await fvkry.waitForDeployment();
+  await mockToken.waitForDeployment();
 
-  console.log('Fvkry Contract Deployed at ' + fvkry.target);
+  console.log('mockToken Contract Deployed at ' + mockToken.target);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
